@@ -1,6 +1,7 @@
 package com.x8bit.bitwarden
 
 import android.app.Application
+import android.util.Log
 import com.x8bit.bitwarden.data.auth.manager.AuthRequestNotificationManager
 import com.x8bit.bitwarden.data.platform.annotation.OmitFromCoverage
 import com.x8bit.bitwarden.data.platform.manager.CrashLogsManager
@@ -36,4 +37,9 @@ class BitwardenApplication : Application() {
 
     @Inject
     lateinit var serverConfigRepository: ServerConfigRepository
+
+    override fun onCreate() {
+        super.onCreate()
+        Log.d("BitwardenApplication", "onCreate")
+    }
 }

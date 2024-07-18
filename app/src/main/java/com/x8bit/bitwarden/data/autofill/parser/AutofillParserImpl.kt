@@ -2,6 +2,7 @@ package com.x8bit.bitwarden.data.autofill.parser
 
 import android.app.assist.AssistStructure
 import android.service.autofill.FillRequest
+import android.util.Log
 import android.view.autofill.AutofillId
 import com.x8bit.bitwarden.data.autofill.model.AutofillAppInfo
 import com.x8bit.bitwarden.data.autofill.model.AutofillPartition
@@ -36,9 +37,10 @@ class AutofillParserImpl(
     override fun parse(
         autofillAppInfo: AutofillAppInfo,
         fillRequest: FillRequest,
-    ): AutofillRequest =
+    ): AutofillRequest {
+        Log.d("AutofillParser", "parse fillRequest")
         // Attempt to get the most recent autofill context.
-        fillRequest
+        return fillRequest
             .fillContexts
             .lastOrNull()
             ?.structure
@@ -50,16 +52,19 @@ class AutofillParserImpl(
                 )
             }
             ?: AutofillRequest.Unfillable
+    }
 
     override fun parse(
         autofillAppInfo: AutofillAppInfo,
         assistStructure: AssistStructure,
-    ): AutofillRequest =
-        parseInternal(
+    ): AutofillRequest {
+        Log.d("AutofillParser", "parse assistStructure")
+        return parseInternal(
             assistStructure = assistStructure,
             autofillAppInfo = autofillAppInfo,
             fillRequest = null,
         )
+    }
 
     /**
      * Parse the [AssistStructure] into an [AutofillRequest].
@@ -70,6 +75,7 @@ class AutofillParserImpl(
         autofillAppInfo: AutofillAppInfo,
         fillRequest: FillRequest?,
     ): AutofillRequest {
+        Log.d("AutofillParser", "parseInternal")
         // Parse the `assistStructure` into internal models.
         val traversalDataList = assistStructure.traverse()
         // Take only the autofill views from the node that currently has focus.
@@ -94,6 +100,7 @@ class AutofillParserImpl(
         val packageName = traversalDataList.buildPackageNameOrNull(
             assistStructure = assistStructure,
         )
+        Log.e("AutofillParser", "PackageName=$packageName")
         val uri = traversalDataList.buildUriOrNull(
             packageName = packageName,
         )
@@ -101,24 +108,28 @@ class AutofillParserImpl(
         val blockListedURIs = settingsRepository.blockedAutofillUris + BLOCK_LISTED_URIS
         if (focusedView == null || blockListedURIs.contains(uri)) {
             // The view is unfillable if there are no focused views or the URI is block listed.
+            Log.d("AutofillParser", "Unfillable no focused view or blocklisted")
             return AutofillRequest.Unfillable
         }
 
         // Choose the first focused partition of data for fulfillment.
         val partition = when (focusedView) {
             is AutofillView.Card -> {
+                Log.d("AutofillParser", "Card Partition")
                 AutofillPartition.Card(
                     views = autofillViews.filterIsInstance<AutofillView.Card>(),
                 )
             }
 
             is AutofillView.Login -> {
+                Log.d("AutofillParser", "Login Partition")
                 AutofillPartition.Login(
                     views = autofillViews.filterIsInstance<AutofillView.Login>(),
                 )
             }
 
             is AutofillView.Unused -> {
+                Log.d("AutofillParser", "Unused")
                 // The view is unfillable since the field is not meant to be used for autofill.
                 // This will never happen since we filter out all unused views above.
                 return AutofillRequest.Unfillable

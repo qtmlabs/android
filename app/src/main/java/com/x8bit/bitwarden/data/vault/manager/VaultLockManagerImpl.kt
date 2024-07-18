@@ -1,5 +1,6 @@
 package com.x8bit.bitwarden.data.vault.manager
 
+import android.util.Log
 import com.bitwarden.core.InitOrgCryptoRequest
 import com.bitwarden.core.InitUserCryptoMethod
 import com.bitwarden.core.InitUserCryptoRequest
@@ -90,6 +91,12 @@ class VaultLockManagerImpl(
         get() = mutableVaultStateEventSharedFlow.asSharedFlow()
 
     init {
+        vaultUnlockDataStateFlow
+            .onEach { vaultUnlockData ->
+                val activeUserStatus = vaultUnlockData.find { it.userId == activeUserId }?.status
+                Log.d("VaultLockManager", "Vault lock state change: $activeUserStatus")
+            }
+            .launchIn(unconfinedScope)
         observeAppForegroundChanges()
         observeUserSwitchingChanges()
         observeVaultTimeoutChanges()

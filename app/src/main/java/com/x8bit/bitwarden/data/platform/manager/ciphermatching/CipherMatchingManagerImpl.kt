@@ -1,5 +1,6 @@
 package com.x8bit.bitwarden.data.platform.manager.ciphermatching
 
+import android.util.Log
 import com.bitwarden.vault.CipherView
 import com.bitwarden.vault.LoginUriView
 import com.bitwarden.vault.UriMatchType
@@ -15,6 +16,8 @@ import com.x8bit.bitwarden.data.vault.repository.VaultRepository
 import com.x8bit.bitwarden.data.vault.repository.model.DomainsData
 import com.x8bit.bitwarden.ui.platform.feature.settings.autofill.util.toSdkUriMatchType
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onStart
 import kotlin.text.RegexOption
 import kotlin.text.isNullOrBlank
 import kotlin.text.lowercase
@@ -41,9 +44,14 @@ class CipherMatchingManagerImpl(
     ): List<CipherView> {
         val equivalentDomainsData = vaultRepository
             .domainsStateFlow
+            .onStart { Log.d("CipherMatchingManager", "domainsStateFlow start") }
+            .onCompletion { Log.d("CipherMatchingManager", "domainsStateFlow Complete") }
             .mapNotNull { it.data }
             .firstWithTimeoutOrNull(timeMillis = GET_DOMAINS_TIMEOUT_MS)
-            ?: return emptyList()
+            ?: run {
+                Log.d("CipherMatchingManager", "Domains timed out")
+                return emptyList()
+            }
 
         val isAndroidApp = matchUri.isAndroidApp()
         val defaultUriMatchType = settingsRepository.defaultUriMatchType.toSdkUriMatchType()

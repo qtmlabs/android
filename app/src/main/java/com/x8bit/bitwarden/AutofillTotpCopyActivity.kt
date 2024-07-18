@@ -1,6 +1,7 @@
 package com.x8bit.bitwarden
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -27,6 +28,8 @@ class AutofillTotpCopyActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.d("AutofillTotpCopyActivity", "onCreate: Intent.action:${intent?.action}")
+        Log.d("AutofillTotpCopyActivity", "onCreate: Intent.dataString:${intent?.dataString}")
 
         observeViewModelEvents()
 

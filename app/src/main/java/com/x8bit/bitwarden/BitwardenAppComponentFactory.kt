@@ -3,6 +3,7 @@ package com.x8bit.bitwarden
 import android.app.Service
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.core.app.AppComponentFactory
 import com.x8bit.bitwarden.data.autofill.BitwardenAutofillService
 import com.x8bit.bitwarden.data.autofill.fido2.BitwardenFido2ProviderService
@@ -31,10 +32,12 @@ class BitwardenAppComponentFactory : AppComponentFactory() {
         intent: Intent?,
     ): Service = when (className) {
         LEGACY_AUTOFILL_SERVICE_NAME -> {
+            Log.d("BitwardenAppComponentFactory", "instantiateServiceCompat: $className")
             super.instantiateServiceCompat(cl, BitwardenAutofillService::class.java.name, intent)
         }
 
         LEGACY_CREDENTIAL_SERVICE_NAME -> {
+            Log.d("BitwardenAppComponentFactory", "instantiateServiceCompat: $className")
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 super.instantiateServiceCompat(
                     cl,

@@ -1,6 +1,5 @@
 package com.x8bit.bitwarden.data.platform.datasource.network.retrofit
 
-import android.util.Log
 import com.x8bit.bitwarden.BuildConfig
 import com.x8bit.bitwarden.data.platform.datasource.network.authenticator.RefreshAuthenticator
 import com.x8bit.bitwarden.data.platform.datasource.network.core.ResultCallAdapterFactory
@@ -78,7 +77,7 @@ class RetrofitsImpl(
     private val loggingInterceptor: HttpLoggingInterceptor by lazy {
         HttpLoggingInterceptor { message ->
             message.chunked(size = MAX_LOG_MESSAGE_LENGTH).forEach { chunk ->
-                Log.d("BitwardenNetworkClient", chunk)
+//                Log.d("BitwardenNetworkClient", chunk)
             }
         }
             .apply {

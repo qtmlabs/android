@@ -141,6 +141,7 @@ class AutofillProcessorTest {
             val autofillRequest: AutofillRequest.Fillable = mockk {
                 every { packageName } returns PACKAGE_NAME
                 every { partition } returns autofillPartition
+                every { uri } returns null
             }
             val saveInfo: SaveInfo = mockk()
             coEvery {
@@ -222,6 +223,7 @@ class AutofillProcessorTest {
             val autofillRequest: AutofillRequest.Fillable = mockk {
                 every { packageName } returns PACKAGE_NAME
                 every { partition } returns autofillPartition
+                every { uri } returns null
             }
             val saveInfo: SaveInfo = mockk()
             coEvery {
@@ -472,6 +474,7 @@ class AutofillProcessorTest {
         val autofillRequest: AutofillRequest.Fillable = mockk {
             every { packageName } returns PACKAGE_NAME
             every { partition } returns autofillPartition
+            every { uri } returns null
         }
         val fillRequest: FillRequest = mockk()
         val saveInfo: SaveInfo = mockk()

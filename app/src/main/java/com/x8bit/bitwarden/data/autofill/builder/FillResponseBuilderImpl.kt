@@ -3,6 +3,7 @@ package com.x8bit.bitwarden.data.autofill.builder
 import android.content.IntentSender
 import android.service.autofill.FillResponse
 import android.service.autofill.SaveInfo
+import android.util.Log
 import com.x8bit.bitwarden.data.autofill.model.AutofillAppInfo
 import com.x8bit.bitwarden.data.autofill.model.FilledData
 import com.x8bit.bitwarden.data.autofill.model.FilledPartition
@@ -22,6 +23,7 @@ class FillResponseBuilderImpl : FillResponseBuilder {
         saveInfo: SaveInfo?,
     ): FillResponse? =
         if (filledData.fillableAutofillIds.isNotEmpty()) {
+            Log.d("FillResponseBuilder", "build")
             val fillResponseBuilder = FillResponse.Builder()
 
             saveInfo
@@ -61,6 +63,7 @@ class FillResponseBuilderImpl : FillResponseBuilder {
                 .setIgnoredIds(*filledData.ignoreAutofillIds.toTypedArray())
                 .build()
         } else {
+            Log.d("FillResponseBuilder", "build")
             // It is impossible for [filledData] to be empty due to the way it is constructed.
             // However, the [FillRequest] requires at least one dataset or an authentication intent
             // with a presentation view. Neither of these make sense in the case where we have no

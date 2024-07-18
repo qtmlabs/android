@@ -59,8 +59,13 @@ android {
         debug {
             applicationIdSuffix = ".dev"
             signingConfig = signingConfigs.getByName("debug")
-            isDebuggable = true
-            isMinifyEnabled = false
+            isDebuggable = false
+            isProfileable = false
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
 
         // Beta and Release variants are identical except beta has a different package name

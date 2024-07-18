@@ -1,5 +1,6 @@
 package com.x8bit.bitwarden.data.autofill.provider
 
+import android.util.Log
 import com.bitwarden.vault.CipherRepromptType
 import com.bitwarden.vault.CipherType
 import com.bitwarden.vault.CipherView
@@ -11,6 +12,8 @@ import com.x8bit.bitwarden.data.platform.util.subtitle
 import com.x8bit.bitwarden.data.vault.repository.VaultRepository
 import com.x8bit.bitwarden.data.vault.repository.model.VaultUnlockData
 import com.x8bit.bitwarden.data.vault.repository.util.statusFor
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onStart
 
 /**
  * The duration, in milliseconds, we should wait while waiting for the vault status to not be
@@ -41,9 +44,12 @@ class AutofillCipherProviderImpl(
         // accounts.
         vaultRepository
             .vaultUnlockDataStateFlow
+            .onStart { Log.d("AutofillCipherProvider", "vaultUnlockDataStateFlow start") }
+            .onCompletion { Log.d("AutofillCipherProvider", "vaultUnlockDataStateFlow completion") }
             .firstWithTimeoutOrNull(timeMillis = VAULT_LOCKED_TIMEOUT_MS) {
                 it.statusFor(userId = userId) != VaultUnlockData.Status.UNLOCKING
             }
+            ?: Log.d("AutofillCipherProvider", "Vault timed out while unlocking")
 
         return !vaultRepository.isVaultUnlocked(userId = userId)
     }
@@ -118,6 +124,22 @@ class AutofillCipherProviderImpl(
         vaultRepository
             .ciphersStateFlow
             .takeUnless { isVaultLocked() }
-            ?.firstWithTimeoutOrNull(timeMillis = GET_CIPHERS_TIMEOUT_MS) { it.data != null }
+            ?.let { stateFlow ->
+                stateFlow
+                    .onStart {
+                        Log.d("AutofillCipherProvider", "getUnlockedCiphersOrNull start")
+                    }
+                    .onCompletion {
+                        Log.d("AutofillCipherProvider", "getUnlockedCiphersOrNull completion")
+                    }
+                    .firstWithTimeoutOrNull(timeMillis = GET_CIPHERS_TIMEOUT_MS) { it.data != null }
+                    ?: run {
+                        Log.d("AutofillCipherProvider", "getUnlockedCiphersOrNull timed out")
+                        null
+                    }
+            }
             ?.data
+            ?.apply {
+                Log.d("AutofillCipherProvider", "getUnlockedCiphersOrNull Count: $size")
+            }
 }

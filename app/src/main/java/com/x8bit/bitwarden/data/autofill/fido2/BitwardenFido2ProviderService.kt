@@ -3,6 +3,7 @@ package com.x8bit.bitwarden.data.autofill.fido2
 import android.os.Build
 import android.os.CancellationSignal
 import android.os.OutcomeReceiver
+import android.util.Log
 import androidx.annotation.Keep
 import androidx.annotation.RequiresApi
 import androidx.credentials.exceptions.ClearCredentialException
@@ -41,6 +42,7 @@ class BitwardenFido2ProviderService : CredentialProviderService() {
         cancellationSignal: CancellationSignal,
         callback: OutcomeReceiver<BeginCreateCredentialResponse, CreateCredentialException>,
     ) {
+        Log.d("CredentialProviderService", "onBeginCreateCredentialRequest")
         processor.processCreateCredentialRequest(
             request,
             cancellationSignal,
@@ -53,6 +55,7 @@ class BitwardenFido2ProviderService : CredentialProviderService() {
         cancellationSignal: CancellationSignal,
         callback: OutcomeReceiver<BeginGetCredentialResponse, GetCredentialException>,
     ) {
+        Log.d("CredentialProviderService", "onBeginGetCredentialRequest")
         processor.processGetCredentialRequest(
             request,
             cancellationSignal,
@@ -65,6 +68,7 @@ class BitwardenFido2ProviderService : CredentialProviderService() {
         cancellationSignal: CancellationSignal,
         callback: OutcomeReceiver<Void?, ClearCredentialException>,
     ) {
+        Log.d("CredentialProviderService", "onClearCredentialStateRequest")
         processor.processClearCredentialStateRequest(
             request,
             cancellationSignal,

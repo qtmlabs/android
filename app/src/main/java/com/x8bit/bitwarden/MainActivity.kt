@@ -2,6 +2,7 @@ package com.x8bit.bitwarden
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -46,6 +47,8 @@ class MainActivity : AppCompatActivity() {
         var shouldShowSplashScreen = true
         installSplashScreen().setKeepOnScreenCondition { shouldShowSplashScreen }
         super.onCreate(savedInstanceState)
+        Log.d("MainActivity", "onCreate: Intent.action:${intent?.action}")
+        Log.d("MainActivity", "onCreate: Intent.dataString:${intent?.dataString}")
 
         observeViewModelEvents()
 
@@ -79,6 +82,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        Log.d("MainActivity", "onNewIntent: Intent.action:${intent.action}")
+        Log.d("MainActivity", "onNewIntent: Intent.dataString:${intent.dataString}")
         mainViewModel.trySendAction(
             action = MainAction.ReceiveNewIntent(
                 intent = intent,

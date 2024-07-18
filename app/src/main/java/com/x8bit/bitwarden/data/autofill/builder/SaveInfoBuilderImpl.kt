@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Build
 import android.service.autofill.FillRequest
 import android.service.autofill.SaveInfo
+import android.util.Log
 import com.x8bit.bitwarden.data.autofill.model.AutofillAppInfo
 import com.x8bit.bitwarden.data.autofill.model.AutofillPartition
 import com.x8bit.bitwarden.data.platform.repository.SettingsRepository
@@ -23,6 +24,7 @@ class SaveInfoBuilderImpl(
         fillRequest: FillRequest,
         packageName: String?,
     ): SaveInfo? {
+        Log.d("SaveInfoBuilder", "build")
         // Make sure that the save prompt is possible.
         val canPerformSaveRequest = autofillPartition.canPerformSaveRequest
         if (settingsRepository.isAutofillSavePromptDisabled || !canPerformSaveRequest) return null

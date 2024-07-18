@@ -1,5 +1,6 @@
 package com.x8bit.bitwarden.data.autofill.builder
 
+import android.util.Log
 import android.widget.inline.InlinePresentationSpec
 import com.x8bit.bitwarden.data.autofill.model.AutofillCipher
 import com.x8bit.bitwarden.data.autofill.model.AutofillPartition
@@ -34,6 +35,7 @@ class FilledDataBuilderImpl(
     private val autofillCipherProvider: AutofillCipherProvider,
 ) : FilledDataBuilder {
     override suspend fun build(autofillRequest: AutofillRequest.Fillable): FilledData {
+        Log.d("FilledDataBuilder", "build")
         val isVaultLocked = autofillCipherProvider.isVaultLocked()
 
         // Subtract one to make sure there is space for the vault item.
@@ -66,6 +68,7 @@ class FilledDataBuilderImpl(
                             inlinePresentationSpec = getCipherInlinePresentationOrNull(),
                         )
                     }
+                    .apply { Log.d("FilledDataBuilder", "Matching Card Count: $size") }
             }
 
             is AutofillPartition.Login -> {
@@ -84,7 +87,8 @@ class FilledDataBuilderImpl(
                                 )
                             }
                     }
-                    ?: emptyList()
+                    .orEmpty()
+                    .apply { Log.d("FilledDataBuilder", "Matching Login Count: $size") }
             }
         }
 

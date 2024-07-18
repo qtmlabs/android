@@ -1,5 +1,6 @@
 package com.x8bit.bitwarden.data.platform.manager
 
+import android.util.Log
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
@@ -25,10 +26,12 @@ class AppForegroundManagerImpl(
             object : DefaultLifecycleObserver {
                 override fun onStart(owner: LifecycleOwner) {
                     mutableAppForegroundStateFlow.value = AppForegroundState.FOREGROUNDED
+                    Log.d("AppForegroundManager", "FOREGROUNDED")
                 }
 
                 override fun onStop(owner: LifecycleOwner) {
                     mutableAppForegroundStateFlow.value = AppForegroundState.BACKGROUNDED
+                    Log.d("AppForegroundManager", "BACKGROUNDED")
                 }
             },
         )

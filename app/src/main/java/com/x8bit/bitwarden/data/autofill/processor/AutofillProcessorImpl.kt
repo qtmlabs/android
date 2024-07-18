@@ -5,6 +5,7 @@ import android.service.autofill.FillCallback
 import android.service.autofill.FillRequest
 import android.service.autofill.SaveCallback
 import android.service.autofill.SaveRequest
+import android.util.Log
 import com.x8bit.bitwarden.data.autofill.builder.FillResponseBuilder
 import com.x8bit.bitwarden.data.autofill.builder.FilledDataBuilder
 import com.x8bit.bitwarden.data.autofill.builder.SaveInfoBuilder
@@ -55,7 +56,10 @@ class AutofillProcessorImpl(
         request: FillRequest,
     ) {
         // Set the listener so that any long running work is cancelled when it is no longer needed.
-        cancellationSignal.setOnCancelListener { job.cancel() }
+        cancellationSignal.setOnCancelListener {
+            Log.d("AutofillProcessor", "onCanceled")
+            job.cancel()
+        }
         // Process the OS data and handle invoking the callback with the result.
         job.cancel()
         job = scope.launch {
@@ -116,6 +120,7 @@ class AutofillProcessorImpl(
         fillCallback: FillCallback,
         fillRequest: FillRequest,
     ) {
+        Log.d("AutofillProcessor", "process")
         // Parse the OS data into an [AutofillRequest] for easier processing.
         val autofillRequest = parser.parse(
             autofillAppInfo = autofillAppInfo,
@@ -123,6 +128,7 @@ class AutofillProcessorImpl(
         )
         when (autofillRequest) {
             is AutofillRequest.Fillable -> {
+                Log.d("AutofillProcessor", "Fillable Uri=${autofillRequest.uri}")
                 // Fulfill the [autofillRequest].
                 val filledData = filledDataBuilder.build(
                     autofillRequest = autofillRequest,
@@ -141,12 +147,14 @@ class AutofillProcessorImpl(
                     saveInfo = saveInfo,
                 )
 
+                Log.d("AutofillProcessor", "Fillable onSuccess")
                 @Suppress("TooGenericExceptionCaught")
                 try {
                     fillCallback.onSuccess(response)
                 } catch (e: RuntimeException) {
                     // This is to catch any TransactionTooLargeExceptions that could occur here.
                     // These exceptions get wrapped as a RuntimeException.
+                    Log.d("AutofillProcessor", "onSuccess failure", e)
                     crashLogsManager.trackNonFatalException(e)
                 }
             }
@@ -155,6 +163,7 @@ class AutofillProcessorImpl(
                 // If we are unable to fulfill the request, we should invoke the callback
                 // with null. This effectively disables autofill for this view set and
                 // allows the [AutofillService] to be unbound.
+                Log.d("AutofillProcessor", "Unfillable onSuccess")
                 fillCallback.onSuccess(null)
             }
         }
