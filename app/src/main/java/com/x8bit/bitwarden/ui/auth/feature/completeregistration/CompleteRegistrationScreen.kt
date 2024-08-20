@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -72,11 +73,19 @@ fun CompleteRegistrationScreen(
     onNavigateToPasswordGuidance: () -> Unit,
     onNavigateToPreventAccountLockout: () -> Unit,
     onNavigateToLogin: (email: String, token: String) -> Unit,
+    generatedPassword: String? = null,
     viewModel: CompleteRegistrationViewModel = hiltViewModel(),
 ) {
     val state by viewModel.stateFlow.collectAsStateWithLifecycle()
     val handler = rememberCompleteRegistrationHandler(viewModel = viewModel)
     val context = LocalContext.current
+    LaunchedEffect(key1 = generatedPassword) {
+        if (generatedPassword != null) {
+            viewModel.trySendAction(
+                CompleteRegistrationAction.GeneratedPasswordResult(generatedPassword),
+            )
+        }
+    }
     EventsEffect(viewModel) { event ->
         when (event) {
             is CompleteRegistrationEvent.NavigateBack -> onNavigateBack.invoke()

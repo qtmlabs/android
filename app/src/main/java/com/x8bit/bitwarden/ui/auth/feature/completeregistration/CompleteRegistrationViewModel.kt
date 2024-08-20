@@ -114,7 +114,22 @@ class CompleteRegistrationViewModel @Inject constructor(
             }
 
             CompleteRegistrationAction.CallToActionClick -> handleCallToActionClick()
+            is CompleteRegistrationAction.GeneratedPasswordResult -> handleGeneratedPasswordResult(
+                action,
+            )
         }
+    }
+
+    private fun handleGeneratedPasswordResult(
+        action: CompleteRegistrationAction.GeneratedPasswordResult,
+    ) {
+        mutableStateFlow.update {
+            it.copy(
+                passwordInput = action.generatedPassword,
+                confirmPasswordInput = action.generatedPassword,
+            )
+        }
+        checkPasswordStrength(input = action.generatedPassword)
     }
 
     private fun verifyEmailAddress() {
@@ -246,21 +261,7 @@ class CompleteRegistrationViewModel @Inject constructor(
     private fun handlePasswordInputChanged(action: PasswordInputChange) {
         // Update input:
         mutableStateFlow.update { it.copy(passwordInput = action.input) }
-        // Update password strength:
-        passwordStrengthJob.cancel()
-        if (action.input.isEmpty()) {
-            mutableStateFlow.update {
-                it.copy(passwordStrengthState = PasswordStrengthState.NONE)
-            }
-        } else {
-            passwordStrengthJob = viewModelScope.launch {
-                val result = authRepository.getPasswordStrength(
-                    email = state.userEmail,
-                    password = action.input,
-                )
-                trySendAction(ReceivePasswordStrengthResult(result))
-            }
-        }
+        checkPasswordStrength(action.input)
     }
 
     private fun handleConfirmPasswordInputChanged(action: ConfirmPasswordInputChange) {
@@ -322,6 +323,24 @@ class CompleteRegistrationViewModel @Inject constructor(
                     registerResult = result,
                 ),
             )
+        }
+    }
+
+    private fun checkPasswordStrength(input: String) {
+        // Update password strength:
+        passwordStrengthJob.cancel()
+        if (input.isEmpty()) {
+            mutableStateFlow.update {
+                it.copy(passwordStrengthState = PasswordStrengthState.NONE)
+            }
+        } else {
+            passwordStrengthJob = viewModelScope.launch {
+                val result = authRepository.getPasswordStrength(
+                    email = state.userEmail,
+                    password = input,
+                )
+                trySendAction(ReceivePasswordStrengthResult(result))
+            }
         }
     }
 }
@@ -517,4 +536,9 @@ sealed class CompleteRegistrationAction {
             val result: PasswordStrengthResult,
         ) : Internal()
     }
+
+    /**
+     * Indicates a generated password has been received.
+     */
+    data class GeneratedPasswordResult(val generatedPassword: String) : CompleteRegistrationAction()
 }

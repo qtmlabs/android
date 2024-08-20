@@ -73,7 +73,11 @@ class MasterPasswordGeneratorViewModel @Inject constructor(
     private fun handleBackAction() = sendEvent(MasterPasswordGeneratorEvent.NavigateBack)
 
     private fun handleSavePasswordAction() {
-        // TODO [PM-10692](https://bitwarden.atlassian.net/browse/PM-10692)
+        sendEvent(
+            MasterPasswordGeneratorEvent.NavigateBackWithPassword(
+                savedPassword = state.generatedPassword,
+            ),
+        )
     }
 
     private fun handlePreventLockoutAction() =
@@ -163,6 +167,11 @@ sealed class MasterPasswordGeneratorEvent {
      * Show a Snackbar message.
      */
     data class ShowSnackbar(val text: Text) : MasterPasswordGeneratorEvent()
+
+    /**
+     * Navigate back to the complete registration screen with the saved password.
+     */
+    data class NavigateBackWithPassword(val savedPassword: String) : MasterPasswordGeneratorEvent()
 }
 
 /**

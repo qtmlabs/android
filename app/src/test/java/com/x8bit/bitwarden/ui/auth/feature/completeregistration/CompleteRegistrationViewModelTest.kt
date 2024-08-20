@@ -416,6 +416,27 @@ class CompleteRegistrationViewModelTest : BaseViewModelTest() {
         coVerify { mockAuthRepository.getPasswordStrength(EMAIL, PASSWORD) }
     }
 
+    @Suppress("MaxLineLength")
+    @Test
+    fun `GeneratedPasswordResult update passwordInput and confirmPasswordInput and call getPasswordStrength`() =
+        runTest {
+            coEvery {
+                mockAuthRepository.getPasswordStrength(EMAIL, PASSWORD)
+            } returns PasswordStrengthResult.Error
+            val viewModel = createCompleteRegistrationViewModel()
+            viewModel.trySendAction(CompleteRegistrationAction.GeneratedPasswordResult(PASSWORD))
+            viewModel.stateFlow.test {
+                assertEquals(
+                    DEFAULT_STATE.copy(
+                        passwordInput = PASSWORD,
+                        confirmPasswordInput = PASSWORD,
+                    ),
+                    awaitItem(),
+                )
+            }
+            coVerify { mockAuthRepository.getPasswordStrength(EMAIL, PASSWORD) }
+        }
+
     @Test
     fun `CheckDataBreachesToggle should change isCheckDataBreachesToggled`() = runTest {
         val viewModel = createCompleteRegistrationViewModel()

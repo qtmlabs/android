@@ -124,6 +124,22 @@ class MasterPasswordGeneratorViewModelTest : BaseViewModelTest() {
             }
         }
 
+    @Test
+    fun `NavigateBackWithPassword event is sent when SavePasswordClickAction is handled`() =
+        runTest {
+            val savedPassword = "saved-pw"
+            val viewModel = createViewModel(
+                initialState = MasterPasswordGeneratorState(generatedPassword = "saved-pw"),
+            )
+            viewModel.eventFlow.test {
+                viewModel.trySendAction(MasterPasswordGeneratorAction.SavePasswordClickAction)
+                assertEquals(
+                    MasterPasswordGeneratorEvent.NavigateBackWithPassword(savedPassword),
+                    awaitItem(),
+                )
+            }
+        }
+
     // region helpers
 
     private fun createViewModel(

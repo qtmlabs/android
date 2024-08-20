@@ -63,12 +63,23 @@ fun NavGraphBuilder.completeRegistrationDestination(
             navArgument(VERIFICATION_TOKEN) { type = NavType.StringType },
             navArgument(FROM_EMAIL) { type = NavType.BoolType },
         ),
-    ) {
+    ) { navBackStackEntry ->
+        val generatedPassword = navBackStackEntry
+            .savedStateHandle
+            .get<String>(CompleteRegistrationNavigation.GENERATED_PASSWORD)
         CompleteRegistrationScreen(
             onNavigateBack = onNavigateBack,
             onNavigateToPasswordGuidance = onNavigateToPasswordGuidance,
             onNavigateToPreventAccountLockout = onNavigateToPreventAccountLockout,
             onNavigateToLogin = onNavigateToLogin,
+            generatedPassword = generatedPassword,
         )
     }
+}
+
+/**
+ * Public values to reference for interaction with the complete registration screen.
+ */
+object CompleteRegistrationNavigation {
+    const val GENERATED_PASSWORD = "generated_password"
 }
