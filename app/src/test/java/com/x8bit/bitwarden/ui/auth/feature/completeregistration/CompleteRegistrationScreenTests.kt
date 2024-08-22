@@ -369,7 +369,7 @@ class CompleteRegistrationScreenTests {
                         dialog = null,
                         passwordStrengthState = PasswordStrengthState.WEAK_3,
                         onBoardingEnabled = false,
-
+                        minimumPasswordLength = 12,
                         ),
                 )
                 every { eventFlow } returns bufferedMutableSharedFlow()
@@ -411,6 +411,7 @@ class CompleteRegistrationScreenTests {
             dialog = null,
             passwordStrengthState = PasswordStrengthState.NONE,
             onBoardingEnabled = false,
+            minimumPasswordLength = 12,
         )
     }
 }
