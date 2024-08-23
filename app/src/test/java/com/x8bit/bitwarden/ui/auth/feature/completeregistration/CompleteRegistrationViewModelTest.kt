@@ -416,6 +416,27 @@ class CompleteRegistrationViewModelTest : BaseViewModelTest() {
         coVerify { mockAuthRepository.getPasswordStrength(EMAIL, PASSWORD) }
     }
 
+    @Test
+    fun `Empty PasswordInputChange update should result in password strength being NONE`() =
+        runTest {
+            val viewModel = createCompleteRegistrationViewModel(
+                completeRegistrationState = DEFAULT_STATE.copy(
+                    passwordInput = PASSWORD,
+                    passwordStrengthState = PasswordStrengthState.STRONG,
+                ),
+            )
+            viewModel.trySendAction(PasswordInputChange(""))
+            val expectedStrengthUpdateState =
+                DEFAULT_STATE.copy(
+                    passwordInput = "",
+                    passwordStrengthState = PasswordStrengthState.NONE,
+                )
+            viewModel.stateFlow.test {
+                assertEquals(expectedStrengthUpdateState, awaitItem())
+            }
+            coVerify(exactly = 0) { mockAuthRepository.getPasswordStrength(EMAIL, PASSWORD) }
+        }
+
     @Suppress("MaxLineLength")
     @Test
     fun `GeneratedPasswordResult update passwordInput and confirmPasswordInput and call getPasswordStrength`() =
