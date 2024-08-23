@@ -36,7 +36,7 @@ import javax.inject.Inject
  */
 @OmitFromCoverage
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+open class MainActivity : AppCompatActivity() {
 
     private val mainViewModel: MainViewModel by viewModels()
 

@@ -83,13 +83,6 @@
                 <data android:pathPattern="/redirect-connector.*" />
             </intent-filter>
             <intent-filter>
-                <action android:name="com.x8bit.bitwarden.fido2.ACTION_CREATE_PASSKEY" />
-                <action android:name="com.x8bit.bitwarden.fido2.ACTION_GET_PASSKEY" />
-                <action android:name="com.x8bit.bitwarden.fido2.ACTION_UNLOCK_ACCOUNT" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -102,6 +95,24 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:scheme="bitwarden" />
+            </intent-filter>
+        </activity>
+
+        <!--
+        Subclass of MainActivity for handling passkey requests.
+        Needed to work around applications that cancel credential manager requests when paused.
+        -->
+        <activity
+            android:name=".PasskeyHandlerActivity"
+            android:exported="false"
+            android:theme="@style/PasskeyHandlerTheme"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="com.x8bit.bitwarden.fido2.ACTION_CREATE_PASSKEY" />
+                <action android:name="com.x8bit.bitwarden.fido2.ACTION_GET_PASSKEY" />
+                <action android:name="com.x8bit.bitwarden.fido2.ACTION_UNLOCK_ACCOUNT" />
+
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
