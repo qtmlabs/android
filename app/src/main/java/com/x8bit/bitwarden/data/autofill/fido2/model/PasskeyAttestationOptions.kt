@@ -12,7 +12,7 @@ data class PasskeyAttestationOptions(
     val authenticatorSelection: AuthenticatorSelectionCriteria,
     @SerialName("challenge")
     val challenge: String,
-    @SerialName("excludedCredentials")
+    @SerialName("excludeCredentials")
     val excludeCredentials: List<PublicKeyCredentialDescriptor> = emptyList(),
     @SerialName("pubKeyCredParams")
     val pubKeyCredParams: List<PublicKeyCredentialParameters>,
