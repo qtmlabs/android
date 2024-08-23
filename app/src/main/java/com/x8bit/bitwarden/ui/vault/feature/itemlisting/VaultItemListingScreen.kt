@@ -194,6 +194,13 @@ fun VaultItemListingScreen(
                 )
             }
         },
+        onDismissFido2CredentialExcludedDialog = remember(viewModel) {
+            {
+                viewModel.trySendAction(
+                    VaultItemListingsAction.DismissFido2CredentialExcludedDialogClick,
+                )
+            }
+        },
         onConfirmOverwriteExistingPasskey = remember(viewModel) {
             { cipherId ->
                 viewModel.trySendAction(
@@ -281,6 +288,7 @@ private fun VaultItemListingDialogs(
     dialogState: VaultItemListingState.DialogState?,
     onDismissRequest: () -> Unit,
     onDismissFido2ErrorDialog: () -> Unit,
+    onDismissFido2CredentialExcludedDialog: () -> Unit,
     onConfirmOverwriteExistingPasskey: (cipherViewId: String) -> Unit,
     onSubmitMasterPasswordFido2Verification: (password: String, cipherId: String) -> Unit,
     onRetryFido2PasswordVerification: (cipherId: String) -> Unit,
@@ -305,6 +313,12 @@ private fun VaultItemListingDialogs(
             title = dialogState.title(),
             message = dialogState.message(),
             onDismissRequest = onDismissFido2ErrorDialog,
+        )
+
+        is VaultItemListingState.DialogState.Fido2CredentialExcluded -> BitwardenBasicDialog(
+            title = dialogState.title(),
+            message = dialogState.message(),
+            onDismissRequest = onDismissFido2CredentialExcludedDialog,
         )
 
         is VaultItemListingState.DialogState.OverwritePasskeyConfirmationPrompt -> {

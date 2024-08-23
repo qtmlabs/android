@@ -1,6 +1,7 @@
 package com.x8bit.bitwarden.ui.vault.feature.itemlisting
 
 import android.os.Parcelable
+import android.util.Base64
 import androidx.annotation.DrawableRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
@@ -201,6 +202,10 @@ class VaultItemListingViewModel @Inject constructor(
             is VaultItemListingsAction.DismissDialogClick -> handleDismissDialogClick()
             is VaultItemListingsAction.DismissFido2ErrorDialogClick -> {
                 handleDismissFido2ErrorDialogClick()
+            }
+
+            is VaultItemListingsAction.DismissFido2CredentialExcludedDialogClick -> {
+                handleDismissFido2CredentialExcludedDialogClick()
             }
 
             is VaultItemListingsAction.MasterPasswordFido2VerificationSubmit -> {
@@ -867,6 +872,14 @@ class VaultItemListingViewModel @Inject constructor(
         }
     }
 
+    private fun handleDismissFido2CredentialExcludedDialogClick() {
+        sendEvent(
+            VaultItemListingEvent.CompleteFido2Registration(
+                result = Fido2RegisterCredentialResult.Cancelled,
+            )
+        )
+    }
+
     private fun handleBackClick() {
         sendEvent(
             event = if (state.isTotp || state.isAutofill) {
@@ -1318,6 +1331,29 @@ class VaultItemListingViewModel @Inject constructor(
 
     private fun vaultLoadedReceive(vaultData: DataState.Loaded<VaultData>) {
         updateStateWithVaultData(vaultData = vaultData.data, clearDialogState = true)
+        state.fido2CreateCredentialRequest
+            ?.let { fido2CredentialRequest ->
+                val excludeCredentials =
+                    fido2CredentialManager.getPasskeyAttestationOptionsOrNull(
+                        requestJson = fido2CredentialRequest.requestJson,
+                    )
+                        ?.excludeCredentials
+                        ?.filter { it.type == "public-key" }
+                        ?.map { Base64.decode(it.id, Base64.URL_SAFE) }
+                if (excludeCredentials != null) {
+                    val isCredentialExcluded = vaultData
+                        .data
+                        .fido2CredentialAutofillViewList
+                        ?.any {
+                            excludeCredentials.any { credentialId ->
+                                credentialId.contentEquals(it.credentialId)
+                            }
+                        } ?: false
+                    if (isCredentialExcluded) {
+                        showFido2CredentialExcludedDialog()
+                    }
+                }
+            }
         state.fido2GetCredentialsRequest
             ?.let { fido2GetCredentialsRequest ->
                 val relyingPartyId = fido2CredentialManager
@@ -1740,6 +1776,17 @@ class VaultItemListingViewModel @Inject constructor(
         }
     }
 
+    private fun showFido2CredentialExcludedDialog() {
+        mutableStateFlow.update {
+            it.copy(
+                dialogState = VaultItemListingState.DialogState.Fido2CredentialExcluded(
+                    title = R.string.passkey_already_exists_title.asText(),
+                    message = R.string.passkey_already_exists_description.asText(),
+                ),
+            )
+        }
+    }
+
     private fun clearDialogState() {
         mutableStateFlow.update { it.copy(dialogState = null) }
     }
@@ -1849,6 +1896,16 @@ data class VaultItemListingState(
          */
         @Parcelize
         data class Fido2OperationFail(
+            val title: Text,
+            val message: Text,
+        ) : DialogState()
+
+        /**
+         * Represents a dialog indicating that a FIDO 2 credential registration was rejected due to
+         * having an excluded credential in the vault.
+         */
+        @Parcelize
+        data class Fido2CredentialExcluded(
             val title: Text,
             val message: Text,
         ) : DialogState()
@@ -2334,6 +2391,11 @@ sealed class VaultItemListingsAction {
      * Click to dismiss the FIDO 2 creation error dialog.
      */
     data object DismissFido2ErrorDialogClick : VaultItemListingsAction()
+
+    /**
+     * Click to dismiss the FIDO 2 already registered dialog.
+     */
+    data object DismissFido2CredentialExcludedDialogClick : VaultItemListingsAction()
 
     /**
      * Click to submit the master password for FIDO 2 verification.
