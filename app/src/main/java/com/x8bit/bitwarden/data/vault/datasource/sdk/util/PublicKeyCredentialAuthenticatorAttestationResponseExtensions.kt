@@ -22,16 +22,15 @@ fun PublicKeyCredentialAuthenticatorAttestationResponse.toAndroidAttestationResp
             publicKey = response.publicKey?.base64EncodeForFido2Response(),
             authenticatorData = response.authenticatorData.base64EncodeForFido2Response(),
         ),
-        clientExtensionResults = clientExtensionResults
-            .credProps
-            ?.rk
-            ?.let { residentKey ->
-                Fido2AttestationResponse.ClientExtensionResults(
-                    credentialProperties = Fido2AttestationResponse
-                        .ClientExtensionResults
-                        .CredentialProperties(residentKey = residentKey),
-                )
-            },
+        clientExtensionResults = Fido2AttestationResponse.ClientExtensionResults(
+            credentialProperties = clientExtensionResults.credProps
+                ?.rk
+                ?.let { residentKey ->
+                    Fido2AttestationResponse.ClientExtensionResults.CredentialProperties(
+                        residentKey = residentKey
+                    )
+                }
+        ),
         authenticatorAttachment = authenticatorAttachment,
     )
 
