@@ -1356,15 +1356,20 @@ class VaultItemListingViewModel @Inject constructor(
             }
         state.fido2GetCredentialsRequest
             ?.let { fido2GetCredentialsRequest ->
-                val relyingPartyId = fido2CredentialManager
-                    .getPasskeyAssertionOptionsOrNull(
+                val passkeyAssertionOptions =
+                    fido2CredentialManager.getPasskeyAssertionOptionsOrNull(
                         requestJson = fido2GetCredentialsRequest.option.requestJson,
                     )
+                val relyingPartyId = passkeyAssertionOptions
                     ?.relyingPartyId
                     ?: run {
                         showFido2ErrorDialog()
                         return
                     }
+                val allowCredentials = passkeyAssertionOptions.allowCredentials
+                    ?.filter { it.type == "public-key" }
+                    ?.mapNotNull { Base64.decode(it.id, Base64.URL_SAFE) }
+                    ?.ifEmpty { null }
                 sendEvent(
                     VaultItemListingEvent.CompleteFido2GetCredentialsRequest(
                         Fido2GetCredentialsResult.Success(
@@ -1374,6 +1379,11 @@ class VaultItemListingViewModel @Inject constructor(
                                 .data
                                 .fido2CredentialAutofillViewList
                                 ?.filter { it.rpId == relyingPartyId }
+                                ?.filter {
+                                    allowCredentials?.any { credentialId ->
+                                        credentialId.contentEquals(it.credentialId)
+                                    } ?: true
+                                }
                                 ?: emptyList(),
                         ),
                     ),

@@ -5,6 +5,7 @@ import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.CancellationSignal
 import android.os.OutcomeReceiver
+import android.util.Base64
 import androidx.annotation.RequiresApi
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
@@ -230,11 +231,16 @@ class Fido2ProviderProcessorImpl(
             .beginGetCredentialOptions
             .flatMap { option ->
                 if (option is BeginGetPublicKeyCredentialOption) {
-                    val relyingPartyId = fido2CredentialManager
-                        .getPasskeyAssertionOptionsOrNull(requestJson = option.requestJson)
+                    val passkeyAssertionOptions =
+                        fido2CredentialManager.getPasskeyAssertionOptionsOrNull(requestJson = option.requestJson)
+                    val relyingPartyId = passkeyAssertionOptions
                         ?.relyingPartyId
                         ?: throw GetCredentialUnknownException("Invalid data.")
-                    buildCredentialEntries(userId, relyingPartyId, option)
+                    val allowCredentials = passkeyAssertionOptions.allowCredentials
+                        ?.filter { it.type == "public-key" }
+                        ?.mapNotNull { Base64.decode(it.id, Base64.URL_SAFE) }
+                        ?.ifEmpty { null }
+                    buildCredentialEntries(userId, relyingPartyId, allowCredentials, option)
                 } else {
                     throw GetCredentialUnsupportedException("Unsupported option.")
                 }
@@ -243,6 +249,7 @@ class Fido2ProviderProcessorImpl(
     private suspend fun buildCredentialEntries(
         userId: String,
         relyingPartyId: String,
+        allowCredentials: List<ByteArray>?,
         option: BeginGetPublicKeyCredentialOption,
     ): List<CredentialEntry> {
         val cipherViews = vaultRepository
@@ -266,6 +273,11 @@ class Fido2ProviderProcessorImpl(
                 result
                     .fido2CredentialAutofillViews
                     .filter { it.rpId == relyingPartyId }
+                    .filter {
+                        allowCredentials?.any { credentialId ->
+                            credentialId.contentEquals(it.credentialId)
+                        } ?: true
+                    }
                     .toCredentialEntries(
                         userId = userId,
                         option = option,
