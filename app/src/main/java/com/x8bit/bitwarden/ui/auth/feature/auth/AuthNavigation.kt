@@ -11,6 +11,7 @@ import com.x8bit.bitwarden.ui.auth.feature.checkemail.navigateToCheckEmail
 import com.x8bit.bitwarden.ui.auth.feature.completeregistration.CompleteRegistrationNavigation
 import com.x8bit.bitwarden.ui.auth.feature.completeregistration.completeRegistrationDestination
 import com.x8bit.bitwarden.ui.auth.feature.completeregistration.navigateToCompleteRegistration
+import com.x8bit.bitwarden.ui.auth.feature.completeregistration.popUpToCompleteRegistration
 import com.x8bit.bitwarden.ui.auth.feature.createaccount.createAccountDestination
 import com.x8bit.bitwarden.ui.auth.feature.createaccount.navigateToCreateAccount
 import com.x8bit.bitwarden.ui.auth.feature.enterprisesignon.enterpriseSignOnDestination
@@ -27,7 +28,6 @@ import com.x8bit.bitwarden.ui.auth.feature.loginwithdevice.model.LoginWithDevice
 import com.x8bit.bitwarden.ui.auth.feature.loginwithdevice.navigateToLoginWithDevice
 import com.x8bit.bitwarden.ui.auth.feature.masterpasswordgenerator.masterPasswordGeneratorDestination
 import com.x8bit.bitwarden.ui.auth.feature.masterpasswordgenerator.navigateToMasterPasswordGenerator
-import com.x8bit.bitwarden.ui.auth.feature.masterpasswordguidance.MASTER_PASSWORD_GUIDANCE
 import com.x8bit.bitwarden.ui.auth.feature.masterpasswordguidance.masterPasswordGuidanceDestination
 import com.x8bit.bitwarden.ui.auth.feature.masterpasswordguidance.navigateToMasterPasswordGuidance
 import com.x8bit.bitwarden.ui.auth.feature.masterpasswordhint.masterPasswordHintDestination
@@ -184,10 +184,7 @@ fun NavGraphBuilder.authGraph(
             onNavigateBack = { navController.popBackStack() },
             onNavigateToPreventLockout = { navController.navigateToPreventAccountLockout() },
             onNavigateBackWithPassword = {
-                navController.popBackStack(
-                    route = MASTER_PASSWORD_GUIDANCE,
-                    inclusive = true,
-                )
+                navController.popUpToCompleteRegistration()
                 navController.currentBackStackEntry?.savedStateHandle?.set(
                     CompleteRegistrationNavigation.GENERATED_PASSWORD,
                     it,

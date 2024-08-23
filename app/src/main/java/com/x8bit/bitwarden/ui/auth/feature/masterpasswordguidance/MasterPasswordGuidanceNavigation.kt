@@ -5,7 +5,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import com.x8bit.bitwarden.ui.platform.base.util.composableWithSlideTransitions
 
-const val MASTER_PASSWORD_GUIDANCE = "master_password_guidance"
+private const val MASTER_PASSWORD_GUIDANCE = "master_password_guidance"
 
 /**
  * Navigate to the master password guidance screen.
