@@ -6,6 +6,7 @@ import androidx.credentials.CreatePublicKeyCredentialRequest
 import androidx.credentials.GetPublicKeyCredentialOption
 import androidx.credentials.provider.BeginGetPublicKeyCredentialOption
 import androidx.credentials.provider.PendingIntentHandler
+import com.x8bit.bitwarden.PasskeyHandlerActivity
 import com.x8bit.bitwarden.data.autofill.fido2.model.Fido2CreateCredentialRequest
 import com.x8bit.bitwarden.data.autofill.fido2.model.Fido2CredentialAssertionRequest
 import com.x8bit.bitwarden.data.autofill.fido2.model.Fido2GetCredentialsRequest
@@ -15,11 +16,24 @@ import com.x8bit.bitwarden.ui.platform.manager.intent.EXTRA_KEY_CREDENTIAL_ID
 import com.x8bit.bitwarden.ui.platform.manager.intent.EXTRA_KEY_USER_ID
 
 /**
+ * Checks is this [Intent] is a trusted request from the system instead of an unprivileged
+ * application attempting request injection.
+ */
+private fun Intent.isValidFido2CredentialRequest(): Boolean {
+    // Since PasskeyHandlerActivity is a private activity, the only way to invoke it is via the
+    // PendingActivity returned by Bitwarden to the system Crdential Manager. If the component being
+    // invoked is PasskeyHandlerActivity then we can assume that the request came from a trusted
+    // source.
+    return component?.className == PasskeyHandlerActivity::class.java.name
+}
+
+/**
  * Checks if this [Intent] contains a [Fido2CreateCredentialRequest] related to an ongoing FIDO 2
  * credential creation process.
  */
 fun Intent.getFido2CreateCredentialRequestOrNull(): Fido2CreateCredentialRequest? {
     if (isBuildVersionBelow(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)) return null
+    if (!isValidFido2CredentialRequest()) return null
 
     val systemRequest = PendingIntentHandler
         .retrieveProviderCreateCredentialRequest(this)
@@ -49,6 +63,7 @@ fun Intent.getFido2CreateCredentialRequestOrNull(): Fido2CreateCredentialRequest
  */
 fun Intent.getFido2AssertionRequestOrNull(): Fido2CredentialAssertionRequest? {
     if (isBuildVersionBelow(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)) return null
+    if (!isValidFido2CredentialRequest()) return null
 
     val systemRequest = PendingIntentHandler
         .retrieveProviderGetCredentialRequest(this)
@@ -89,6 +104,7 @@ fun Intent.getFido2AssertionRequestOrNull(): Fido2CredentialAssertionRequest? {
  */
 fun Intent.getFido2GetCredentialsRequestOrNull(): Fido2GetCredentialsRequest? {
     if (isBuildVersionBelow(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)) return null
+    if (!isValidFido2CredentialRequest()) return null
 
     val systemRequest = PendingIntentHandler
         .retrieveBeginGetCredentialRequest(this)
