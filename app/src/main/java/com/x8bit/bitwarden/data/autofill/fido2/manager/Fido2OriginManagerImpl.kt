@@ -136,12 +136,10 @@ class Fido2OriginManagerImpl(
             val target = statement.target
             target.namespace == "android_app" &&
                 target.packageName == rpPackageName &&
-                statement.relation.containsAll(
-                    listOf(
-                        "delegate_permission/common.get_login_creds",
-                        "delegate_permission/common.handle_all_urls",
-                    ),
-                )
+                statement.relation.any {
+                    it == "delegate_permission/common.get_login_creds" ||
+                        it == "delegate_permission/common.handle_all_urls"
+                }
         }
             .takeUnless { it.isEmpty() }
 
