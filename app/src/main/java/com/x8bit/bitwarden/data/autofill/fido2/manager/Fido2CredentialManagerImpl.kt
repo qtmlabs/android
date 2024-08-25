@@ -25,6 +25,7 @@ import com.x8bit.bitwarden.data.vault.datasource.sdk.util.toAndroidFido2PublicKe
 import com.x8bit.bitwarden.ui.platform.base.util.toHostOrPathOrNull
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 
 /**
  * Primary implementation of [Fido2CredentialManager].
@@ -77,12 +78,25 @@ class Fido2CredentialManagerImpl(
                 assetLinkUrl = assetLinkUrl,
             ),
         )
+
+        // Workaround for a bug in PayPal
+        val requestJson = try {
+            json.encodeToString(JsonObject(
+                json.decodeFromString<JsonObject>(fido2CreateCredentialRequest.requestJson)
+                    .entries
+                    .filter { it.key != "timeout" }
+                    .associate { it.toPair() }
+            ))
+        } catch (e: SerializationException) {
+            null
+        }
+
         return vaultSdkSource
             .registerFido2Credential(
                 request = RegisterFido2CredentialRequest(
                     userId = userId,
                     origin = origin,
-                    requestJson = """{"publicKey": ${fido2CreateCredentialRequest.requestJson}}""",
+                    requestJson = """{"publicKey": ${requestJson}}""",
                     clientData = clientData,
                     selectedCipherView = selectedCipherView,
                     // User verification is handled prior to engaging the SDK. We always respond
