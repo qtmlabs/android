@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.x8bit.bitwarden.PasskeyHandlerActivity
 import com.x8bit.bitwarden.data.autofill.util.createdForAutofill
 import com.x8bit.bitwarden.data.platform.manager.model.AppCreationState
 import com.x8bit.bitwarden.data.platform.manager.model.AppForegroundState
@@ -58,7 +59,7 @@ class AppStateManagerImpl(
 
         override fun onActivityDestroyed(activity: Activity) {
             activityCount--
-            if (activityCount == 0 && !activity.isChangingConfigurations) {
+            if (activityCount == 0 && !activity.isChangingConfigurations && activity !is PasskeyHandlerActivity) {
                 mutableAppCreationStateFlow.value = AppCreationState.Destroyed
             }
         }
